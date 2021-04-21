@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strings"
 
 	"github.com/cortezaproject/corteza-server/pkg/actionlog"
 	"github.com/cortezaproject/corteza-server/pkg/errors"
@@ -30,6 +31,19 @@ type (
 		CanReadAuthClient(context.Context, *types.AuthClient) bool
 		CanUpdateAuthClient(context.Context, *types.AuthClient) bool
 		CanDeleteAuthClient(context.Context, *types.AuthClient) bool
+	}
+)
+
+var (
+	validGrantTypes = map[string]bool{
+		"authorization_code": true,
+		"client_credentials": true,
+	}
+
+	validScopes = map[string]bool{
+		"profile":   true,
+		"api":       true,
+		"discovery": true,
 	}
 )
 
@@ -185,7 +199,7 @@ func (svc *authClient) Search(ctx context.Context, af types.AuthClientFilter) (a
 	return aa, f, svc.recordAction(ctx, aaProps, AuthClientActionSearch, err)
 }
 
-func (svc *authClient) Create(ctx context.Context, new *types.AuthClient) (app *types.AuthClient, err error) {
+func (svc *authClient) Create(ctx context.Context, new *types.AuthClient) (ac *types.AuthClient, err error) {
 	var (
 		aaProps = &authClientActionProps{new: new}
 	)
@@ -203,6 +217,16 @@ func (svc *authClient) Create(ctx context.Context, new *types.AuthClient) (app *
 		new.ID = nextID()
 		new.CreatedAt = *now()
 		new.Secret = string(rand.Bytes(64))
+
+		if new.ValidGrant == "" {
+			new.ValidGrant = "authorization_code"
+		} else if !validGrantTypes[new.ValidGrant] {
+			return AuthClientErrUnknownGrantType()
+		}
+
+		if !validateScopes(new.Scope) {
+			return AuthClientErrUnknownGrantType()
+		}
 
 		if new.Security == nil {
 			new.Security = &types.AuthClientSecurity{}
@@ -227,13 +251,13 @@ func (svc *authClient) Create(ctx context.Context, new *types.AuthClient) (app *
 			return
 		}
 
-		app = new
+		ac = new
 
 		_ = svc.eventbus.WaitFor(ctx, event.AuthClientAfterCreate(new, nil))
 		return nil
 	}()
 
-	return app, svc.recordAction(ctx, aaProps, AuthClientActionCreate, err)
+	return ac, svc.recordAction(ctx, aaProps, AuthClientActionCreate, err)
 }
 
 func (svc *authClient) Update(ctx context.Context, upd *types.AuthClient) (app *types.AuthClient, err error) {
@@ -292,6 +316,14 @@ func (svc *authClient) Update(ctx context.Context, upd *types.AuthClient) (app *
 		// Next validate after the automation occurs
 		if err = defaultClientValidator(app, upd); err != nil {
 			return err
+		}
+
+		if app.ValidGrant != upd.ValidGrant && !validGrantTypes[upd.ValidGrant] {
+			return AuthClientErrUnknownGrantType()
+		}
+
+		if app.Scope != upd.Scope && !validateScopes(upd.Scope) {
+			return AuthClientErrUnknownGrantType()
 		}
 
 		// Assign changed values after afterUpdate events are emitted
@@ -425,4 +457,14 @@ func toLabeledAuthClients(set []*types.AuthClient) []label.LabeledResource {
 	}
 
 	return ll
+}
+
+func validateScopes(scope string) bool {
+	for _, s := range strings.Split(scope, " ") {
+		if !validScopes[s] {
+			return false
+		}
+	}
+
+	return true
 }
