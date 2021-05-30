@@ -40,8 +40,8 @@ type (
 
 var (
 	mOptions            = &options.MessagebusOpt{Enabled: true, LogEnabled: true}
-	sqlQueueSettings    = QueueSettings{ID: 1, Consumer: "sql", Queue: "sql"}
-	foobarQueueSettings = QueueSettings{ID: 1, Consumer: "foobar", Queue: "foobar"}
+	sqlQueueSettings    = MessageQueue{ID: 1, Consumer: "sql", Queue: "sql"}
+	foobarQueueSettings = MessageQueue{ID: 1, Consumer: "foobar", Queue: "foobar"}
 	foobarQueueMessage  = QueueMessage{ID: 1, Queue: "foobar", Payload: []byte(`{}`), Created: now()}
 	logger              = zap.NewNop()
 )
@@ -51,7 +51,7 @@ func Test_messageBusRegister(t *testing.T) {
 	ctx := context.Background()
 
 	mb := New(mOptions, logger)
-	mb.Register(ctx, &QueueSettings{Consumer: "foobar", Queue: "foobar"}, &mockQueueHandler{})
+	mb.Register(ctx, &MessageQueue{Consumer: "foobar", Queue: "foobar"}, &mockQueueHandler{})
 
 	req.NotEmpty(mb.queues)
 	req.NotEmpty(mb.queues["foobar"])

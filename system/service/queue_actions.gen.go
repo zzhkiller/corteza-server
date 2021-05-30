@@ -20,10 +20,10 @@ import (
 
 type (
 	queueActionProps struct {
-		queue  *messagebus.QueueSettings
-		new    *messagebus.QueueSettings
-		update *messagebus.QueueSettings
-		search *messagebus.QueueSettingsFilter
+		queue  *types.Queue
+		new    *types.Queue
+		update *types.Queue
+		search *types.QueueFilter
 	}
 
 	queueAction struct {
@@ -57,7 +57,7 @@ var (
 //
 // This function is auto-generated.
 //
-func (p *queueActionProps) setQueue(queue *messagebus.QueueSettings) *queueActionProps {
+func (p *queueActionProps) setQueue(queue *types.Queue) *queueActionProps {
 	p.queue = queue
 	return p
 }
@@ -68,7 +68,7 @@ func (p *queueActionProps) setQueue(queue *messagebus.QueueSettings) *queueActio
 //
 // This function is auto-generated.
 //
-func (p *queueActionProps) setNew(new *messagebus.QueueSettings) *queueActionProps {
+func (p *queueActionProps) setNew(new *types.Queue) *queueActionProps {
 	p.new = new
 	return p
 }
@@ -79,7 +79,7 @@ func (p *queueActionProps) setNew(new *messagebus.QueueSettings) *queueActionPro
 //
 // This function is auto-generated.
 //
-func (p *queueActionProps) setUpdate(update *messagebus.QueueSettings) *queueActionProps {
+func (p *queueActionProps) setUpdate(update *types.Queue) *queueActionProps {
 	p.update = update
 	return p
 }
@@ -90,7 +90,7 @@ func (p *queueActionProps) setUpdate(update *messagebus.QueueSettings) *queueAct
 //
 // This function is auto-generated.
 //
-func (p *queueActionProps) setSearch(search *messagebus.QueueSettingsFilter) *queueActionProps {
+func (p *queueActionProps) setSearch(search *types.QueueFilter) *queueActionProps {
 	p.search = search
 	return p
 }

@@ -20,21 +20,21 @@ type (
 )
 
 var (
-	testQueueDispatched = &messagebus.QueueSettings{
+	testQueueDispatched = &messagebus.MessageQueue{
 		ID:       1,
 		Queue:    "test",
 		Consumer: string(messagebus.ConsumerStore),
-		Meta: messagebus.QueueSettingsMeta{
+		Meta: messagebus.MessageQueueMeta{
 			PollDelay:      makeDelay(time.Second),
 			DispatchEvents: true,
 		},
 	}
 
-	testQueueEb = &messagebus.QueueSettings{
+	testQueueEb = &messagebus.MessageQueue{
 		ID:       1,
 		Queue:    "test_eb",
 		Consumer: string(messagebus.ConsumerEventbus),
-		Meta: messagebus.QueueSettingsMeta{
+		Meta: messagebus.MessageQueueMeta{
 			PollDelay:      makeDelay(time.Second),
 			DispatchEvents: true,
 		},

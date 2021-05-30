@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cortezaproject/corteza-server/pkg/messagebus/consumers"
 	"github.com/cortezaproject/corteza-server/pkg/options"
 	"go.uber.org/zap"
 )
@@ -27,7 +28,6 @@ type (
 	}
 
 	QueueStorer interface {
-		SearchMessagebusQueueSettings(ctx context.Context, f QueueSettingsFilter) (QueueSettingsSet, QueueSettingsFilter, error)
 		SearchMessagebusQueueMessages(ctx context.Context, f QueueMessageFilter) (QueueMessageSet, QueueMessageFilter, error)
 		CreateMessagebusQueueMessage(ctx context.Context, rr ...*QueueMessage) error
 		UpdateMessagebusQueueMessage(ctx context.Context, rr ...*QueueMessage) error
@@ -153,10 +153,10 @@ func (mb *messageBus) Push(q string, p []byte) {
 	mb.in <- message{p: p, q: q}
 }
 
-func (mb *messageBus) Register(ctx context.Context, qs *QueueSettings, consumer Consumer) {
+func (mb *messageBus) Register(ctx context.Context, q string, consumer consumers.Consumer, s *Settings) {
 	// associate consumer with the queue
-	mb.queues[qs.Queue] = &Queue{
-		settings: *qs,
+	mb.queues[q] = &Queue{
+		settings: s,
 		consumer: consumer,
 	}
 }
@@ -170,7 +170,7 @@ func (mb *messageBus) queue(q string) *Queue {
 }
 
 func (mb *messageBus) initQueues(ctx context.Context, storer QueueStorer) error {
-	list, _, err := storer.SearchMessagebusQueueSettings(ctx, QueueSettingsFilter{})
+	list, _, err := storer.SearchMessagebusQueueSettings(ctx, MessageQueueFilter{})
 
 	if err != nil {
 		return err
@@ -203,20 +203,18 @@ func (mb *messageBus) initQueues(ctx context.Context, storer QueueStorer) error 
 }
 
 // initHandler returns a new instance for a specific handler
-func (mb *messageBus) initConsumer(ctx context.Context, settings QueueSettings) (consumer Consumer, err error) {
-	handle := settings.Consumer
-
-	switch handle {
-	case string(ConsumerEventbus):
-		consumer = NewEventbusConsumer(settings)
+func (mb *messageBus) initConsumer(ctx context.Context, ctype ConsumerType, queueName string) (consumer Consumer, err error) {
+	switch ctype {
+	case ConsumerEventbus:
+		consumer = NewEventbusConsumer(queueName)
 		return
 
-	case string(ConsumerStore):
-		consumer = NewStoreConsumer(settings)
+	case ConsumerStore:
+		consumer = NewStoreConsumer(queueName)
 		return
 
 	default:
-		err = fmt.Errorf("message queue consumer %s not implemented", handle)
+		err = fmt.Errorf("message queue consumer '%s' not implemented", ctype)
 		return
 	}
 }

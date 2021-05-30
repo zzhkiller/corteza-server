@@ -6,7 +6,7 @@ package automation
 // the code is regenerated.
 //
 // Definitions file that controls how this file is generated:
-// automation/automation/queue_handler.yaml
+// system/automation/queue_handler.yaml
 
 import (
 	"context"

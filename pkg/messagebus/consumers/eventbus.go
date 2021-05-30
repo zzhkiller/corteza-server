@@ -1,11 +1,10 @@
-package messagebus
+package consumers
 
 import (
 	"context"
 
 	"github.com/cortezaproject/corteza-server/pkg/eventbus"
 	"github.com/cortezaproject/corteza-server/system/service/event"
-	"github.com/cortezaproject/corteza-server/system/types"
 )
 
 type (
@@ -20,9 +19,9 @@ type (
 	}
 )
 
-func NewEventbusConsumer(settings QueueSettings) *EventbusConsumer {
+func NewEventbusConsumer(q string) *EventbusConsumer {
 	h := &EventbusConsumer{
-		queue:      settings.Queue,
+		queue:      q,
 		handle:     ConsumerEventbus,
 		dispatcher: eventbus.Service(),
 	}
@@ -31,15 +30,6 @@ func NewEventbusConsumer(settings QueueSettings) *EventbusConsumer {
 }
 
 func (cq *EventbusConsumer) Write(ctx context.Context, p []byte) error {
-	cq.dispatcher.Dispatch(ctx, event.QueueOnMessage(makeEvent(cq.queue, p)))
+	cq.dispatcher.Dispatch(ctx, event.QueueOnMessage(cq.queue, p))
 	return nil
-}
-
-func (cq *EventbusConsumer) SetStore(s QueueStorer) {}
-
-func makeEvent(q string, p []byte) *types.QueueMessage {
-	return &types.QueueMessage{
-		Queue:   q,
-		Payload: string(p),
-	}
 }

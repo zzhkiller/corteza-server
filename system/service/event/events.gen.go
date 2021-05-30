@@ -241,7 +241,8 @@ type (
 	// This type is auto-generated.
 	queueBase struct {
 		immutable bool
-		payload   *types.QueueMessage
+		queue     string
+		payload   []byte
 		invoker   auth.Identifiable
 	}
 
@@ -1954,11 +1955,13 @@ func (queueOnMessage) EventType() string {
 //
 // This function is auto-generated.
 func QueueOnMessage(
-	argPayload *types.QueueMessage,
+	argQueue string,
+	argPayload []byte,
 ) *queueOnMessage {
 	return &queueOnMessage{
 		queueBase: &queueBase{
 			immutable: false,
+			queue:     argQueue,
 			payload:   argPayload,
 		},
 	}
@@ -1970,27 +1973,43 @@ func QueueOnMessage(
 //
 // This function is auto-generated.
 func QueueOnMessageImmutable(
-	argPayload *types.QueueMessage,
+	argQueue string,
+	argPayload []byte,
 ) *queueOnMessage {
 	return &queueOnMessage{
 		queueBase: &queueBase{
 			immutable: true,
+			queue:     argQueue,
 			payload:   argPayload,
 		},
 	}
 }
 
+// SetQueue sets new queue value
+//
+// This function is auto-generated.
+func (res *queueBase) SetQueue(argQueue string) {
+	res.queue = argQueue
+}
+
+// Queue returns queue
+//
+// This function is auto-generated.
+func (res queueBase) Queue() string {
+	return res.queue
+}
+
 // SetPayload sets new payload value
 //
 // This function is auto-generated.
-func (res *queueBase) SetPayload(argPayload *types.QueueMessage) {
+func (res *queueBase) SetPayload(argPayload []byte) {
 	res.payload = argPayload
 }
 
 // Payload returns payload
 //
 // This function is auto-generated.
-func (res queueBase) Payload() *types.QueueMessage {
+func (res queueBase) Payload() []byte {
 	return res.payload
 }
 
@@ -2012,6 +2031,10 @@ func (res queueBase) Invoker() auth.Identifiable {
 func (res queueBase) Encode() (args map[string][]byte, err error) {
 	args = make(map[string][]byte)
 
+	if args["queue"], err = json.Marshal(res.queue); err != nil {
+		return nil, err
+	}
+
 	if args["payload"], err = json.Marshal(res.payload); err != nil {
 		return nil, err
 	}
@@ -2028,13 +2051,15 @@ func (res queueBase) EncodeVars() (out *expr.Vars, err error) {
 	out = &expr.Vars{}
 	var v expr.TypedValue
 
-	if v, err = automation.NewQueueMessage(res.payload); err == nil {
-		err = out.Set("payload", v)
+	if v, err = automation.NewHandle(res.queue); err == nil {
+		err = out.Set("queue", v)
 	}
 
 	if err != nil {
 		return
 	}
+
+	// Could not found expression-type counterpart for []byte
 
 	// Could not found expression-type counterpart for auth.Identifiable
 
@@ -2048,9 +2073,17 @@ func (res *queueBase) Decode(results map[string][]byte) (err error) {
 		// Respect immutability
 		return
 	}
-	if res.payload != nil {
+	if res.queue != nil {
 		if r, ok := results["result"]; ok && len(results) == 1 {
-			if err = json.Unmarshal(r, res.payload); err != nil {
+			if err = json.Unmarshal(r, res.queue); err != nil {
+				return
+			}
+		}
+	}
+
+	if res.queue != nil {
+		if r, ok := results["queue"]; ok {
+			if err = json.Unmarshal(r, res.queue); err != nil {
 				return
 			}
 		}
@@ -2079,15 +2112,16 @@ func (res *queueBase) DecodeVars(vars *expr.Vars) (err error) {
 		// Respect immutability
 		return
 	}
-	if res.payload != nil && vars.Has("payload") {
-		var aux *automation.QueueMessage
-		aux, err = automation.NewQueueMessage(expr.Must(vars.Select("payload")))
+	if res.queue != nil && vars.Has("queue") {
+		var aux *automation.Handle
+		aux, err = automation.NewHandle(expr.Must(vars.Select("queue")))
 		if err != nil {
 			return
 		}
 
-		res.payload = aux.GetValue()
+		res.queue = aux.GetValue()
 	}
+	// Could not find expression-type counterpart for []byte
 	// Could not find expression-type counterpart for auth.Identifiable
 
 	return

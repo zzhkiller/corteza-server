@@ -114,7 +114,9 @@ system:application:
 system:queue:
   on: ['message']
   props:
+    - name: 'queue'
+      type: 'string'
     - name: 'payload'
-      type: '*types.QueueMessage'
+      type: '[]byte'
   constraints:
-    - name: payload.queue
+    - name: queue

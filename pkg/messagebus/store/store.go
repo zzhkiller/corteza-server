@@ -1,4 +1,4 @@
-package messagebus
+package store
 
 import (
 	"context"
@@ -14,9 +14,9 @@ type (
 	}
 )
 
-func NewStoreConsumer(settings QueueSettings) *StoreConsumer {
+func NewStoreConsumer(q string) *StoreConsumer {
 	h := &StoreConsumer{
-		queue:  settings.Queue,
+		queue:  q,
 		handle: ConsumerStore,
 		client: &sClient{},
 	}

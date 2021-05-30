@@ -1,4 +1,4 @@
-package messagebus
+package types
 
 import (
 	"encoding/json"
@@ -10,35 +10,39 @@ import (
 
 func Test_settingsUnmarshal(t *testing.T) {
 	var (
+		makeDelay = func(s time.Duration) *time.Duration {
+			return &s
+		}
+
 		tcc = []struct {
 			name    string
 			payload string
 			err     error
-			expect  QueueSettingsMeta
+			expect  QueueMeta
 		}{
 			{
 				name:    "settings defaults",
 				payload: `{}`,
 				err:     nil,
-				expect:  QueueSettingsMeta{PollDelay: nil, DispatchEvents: false},
+				expect:  QueueMeta{PollDelay: nil, DispatchEvents: false},
 			},
 			{
 				name:    "settings enabled dispatch events",
 				payload: `{"poll_delay": "7s", "dispatch_events": true}`,
 				err:     nil,
-				expect:  QueueSettingsMeta{PollDelay: makeDelay(time.Second * 7), DispatchEvents: true},
+				expect:  QueueMeta{PollDelay: makeDelay(time.Second * 7), DispatchEvents: true},
 			},
 			{
 				name:    "settings disabled dispatch events",
 				payload: `{"poll_delay": "7s", "dispatch_events": false}`,
 				err:     nil,
-				expect:  QueueSettingsMeta{PollDelay: makeDelay(time.Second * 7), DispatchEvents: false},
+				expect:  QueueMeta{PollDelay: makeDelay(time.Second * 7), DispatchEvents: false},
 			},
 			{
 				name:    "settings invalid poll delay",
 				payload: `{"poll_delay": "7seconds", "dispatch_events": false}`,
 				err:     nil,
-				expect:  QueueSettingsMeta{PollDelay: nil, DispatchEvents: false},
+				expect:  QueueMeta{PollDelay: nil, DispatchEvents: false},
 			},
 		}
 	)
@@ -47,7 +51,7 @@ func Test_settingsUnmarshal(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			req := require.New(t)
 
-			s := &QueueSettingsMeta{}
+			s := &QueueMeta{}
 			err := json.Unmarshal([]byte(tc.payload), s)
 
 			req.Equal(tc.err, err)

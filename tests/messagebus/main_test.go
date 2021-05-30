@@ -150,12 +150,12 @@ func (h helper) noError(err error) {
 
 func (h helper) prepareRBAC() {}
 
-func (h helper) prepareQueues(ctx context.Context, qs ...*messagebus.QueueSettings) {
+func (h helper) prepareQueues(ctx context.Context, qs ...*messagebus.MessageQueue) {
 	h.noError(testApp.Store.TruncateMessagebusQueueSettings(ctx))
 	h.noError(testApp.Store.CreateMessagebusQueueSetting(ctx, qs...))
 }
 
-func (h helper) prepareMessages(ctx context.Context, qs ...*messagebus.QueueSettings) {
+func (h helper) prepareMessages(ctx context.Context, qs ...*messagebus.MessageQueue) {
 	h.noError(testApp.Store.TruncateMessagebusQueueMessages(ctx))
 }
 

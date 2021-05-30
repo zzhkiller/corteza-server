@@ -14,11 +14,11 @@ import (
 func testMessagebusQueueSettings(t *testing.T, s store.MessagebusQueueSettings) {
 	var (
 		ctx = context.Background()
-		new = &messagebus.QueueSettings{
+		new = &messagebus.MessageQueue{
 			ID:        42,
 			Consumer:  "testConsumer",
 			Queue:     "testQueue",
-			Meta:      messagebus.QueueSettingsMeta{},
+			Meta:      messagebus.MessageQueueMeta{},
 			CreatedAt: time.Now(),
 			CreatedBy: 1}
 	)
@@ -38,14 +38,14 @@ func testMessagebusQueueSettings(t *testing.T, s store.MessagebusQueueSettings) 
 	t.Run("upsert", func(t *testing.T) {
 		req := require.New(t)
 		req.NoError(s.TruncateMessagebusQueueSettings(ctx))
-		req.NoError(s.UpsertMessagebusQueueSetting(ctx, &messagebus.QueueSettings{ID: 42, Queue: "test"}))
-		set, _, err := s.SearchMessagebusQueueSettings(ctx, messagebus.QueueSettingsFilter{})
+		req.NoError(s.UpsertMessagebusQueueSetting(ctx, &messagebus.MessageQueue{ID: 42, Queue: "test"}))
+		set, _, err := s.SearchMessagebusQueueSettings(ctx, messagebus.MessageQueueFilter{})
 		req.NoError(err)
 		req.Len(set, 1)
 		req.True(set[0].Queue == "test")
 
-		req.NoError(s.UpsertMessagebusQueueSetting(ctx, &messagebus.QueueSettings{ID: 42, Queue: "foobar"}))
-		set, _, err = s.SearchMessagebusQueueSettings(ctx, messagebus.QueueSettingsFilter{})
+		req.NoError(s.UpsertMessagebusQueueSetting(ctx, &messagebus.MessageQueue{ID: 42, Queue: "foobar"}))
+		set, _, err = s.SearchMessagebusQueueSettings(ctx, messagebus.MessageQueueFilter{})
 		req.NoError(err)
 		req.Len(set, 1)
 		req.True(set[0].Queue == "foobar")
@@ -58,7 +58,7 @@ func testMessagebusQueueSettings(t *testing.T, s store.MessagebusQueueSettings) 
 			new,
 		))
 
-		set, _, err := s.SearchMessagebusQueueSettings(ctx, messagebus.QueueSettingsFilter{})
+		set, _, err := s.SearchMessagebusQueueSettings(ctx, messagebus.MessageQueueFilter{})
 		req.NoError(err)
 		req.Len(set, 1)
 	})

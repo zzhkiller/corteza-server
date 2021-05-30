@@ -14,7 +14,7 @@ allow:
     system:template:
       - render
 
-    system:messagebus-queue:
+    system:queue:
       - queue.read
 
   admins:
@@ -29,7 +29,7 @@ allow:
       - template.create
       - role.create
       - reminder.assign
-      - messagebus-queue.create
+      - queue.create
 
     system:application:
       - read
@@ -57,7 +57,7 @@ allow:
       - delete
       - render
 
-    system:messagebus-queue:
+    system:queue:
       - read
       - update
       - delete

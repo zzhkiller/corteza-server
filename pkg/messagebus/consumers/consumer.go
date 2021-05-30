@@ -1,7 +1,9 @@
-package messagebus
+package consumers
 
 import (
 	"context"
+
+	"github.com/cortezaproject/corteza-server/pkg/messagebus"
 )
 
 const (
@@ -25,7 +27,13 @@ type (
 	}
 
 	Storer interface {
-		SetStore(QueueStorer)
+		SetStore(storer messagebus.QueueStorer)
+	}
+
+	QueueStorer interface {
+		SearchMessagebusQueueMessages(ctx context.Context, f QueueMessageFilter) (QueueMessageSet, QueueMessageFilter, error)
+		CreateMessagebusQueueMessage(ctx context.Context, rr ...*QueueMessage) error
+		UpdateMessagebusQueueMessage(ctx context.Context, rr ...*QueueMessage) error
 	}
 )
 

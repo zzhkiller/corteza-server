@@ -31,7 +31,7 @@ package store
 //  - store/flags.yaml
 //  - store/labels.yaml
 //  - store/messagebus_queue_message.yaml
-//  - store/messagebus_queue_settings.yaml
+//  - store/queues.yaml
 //  - store/rbac_rules.yaml
 //  - store/reminders.yaml
 //  - store/role_members.yaml
@@ -74,7 +74,7 @@ type (
 		Flags
 		Labels
 		MessagebusQueueMessages
-		MessagebusQueueSettings
+		Queues
 		RbacRules
 		Reminders
 		RoleMembers

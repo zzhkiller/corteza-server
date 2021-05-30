@@ -3,7 +3,7 @@ package rdbms
 // This file is an auto-generated file
 //
 // Template:    pkg/codegen/assets/store_rdbms.gen.go.tpl
-// Definitions: store/messagebus_queue_settings.yaml
+// Definitions: store/queues.yaml
 //
 // Changes to this file may cause incorrect behavior
 // and will be lost if the code is regenerated.
@@ -21,19 +21,19 @@ import (
 
 var _ = errors.Is
 
-// SearchMessagebusQueueSettings returns all matching rows
+// SearchQueues returns all matching rows
 //
-// This function calls convertMessagebusQueueSettingFilter with the given
-// types.MessagebusQueueSettingFilter and expects to receive a working squirrel.SelectBuilder
-func (s Store) SearchMessagebusQueueSettings(ctx context.Context, f types.MessagebusQueueSettingFilter) (types.MessagebusQueueSettingSet, types.MessagebusQueueSettingFilter, error) {
+// This function calls convertQueueFilter with the given
+// types.QueueFilter and expects to receive a working squirrel.SelectBuilder
+func (s Store) SearchQueues(ctx context.Context, f types.QueueFilter) (types.QueueSet, types.QueueFilter, error) {
 	var (
 		err error
-		set []*types.MessagebusQueueSetting
+		set []*types.Queue
 		q   squirrel.SelectBuilder
 	)
 
 	return set, f, func() error {
-		q, err = s.convertMessagebusQueueSettingFilter(f)
+		q, err = s.convertQueueFilter(f)
 		if err != nil {
 			return err
 		}
@@ -72,7 +72,7 @@ func (s Store) SearchMessagebusQueueSettings(ctx context.Context, f types.Messag
 			sort.Reverse()
 		}
 
-		set, f.PrevPage, f.NextPage, err = s.fetchFullPageOfMessagebusQueueSettings(
+		set, f.PrevPage, f.NextPage, err = s.fetchFullPageOfQueues(
 			ctx,
 			q, f.Sort, f.PageCursor,
 			f.Limit,
@@ -91,7 +91,7 @@ func (s Store) SearchMessagebusQueueSettings(ctx context.Context, f types.Messag
 	}()
 }
 
-// fetchFullPageOfMessagebusQueueSettings collects all requested results.
+// fetchFullPageOfQueues collects all requested results.
 //
 // Function applies:
 //  - cursor conditions (where ...)
@@ -101,17 +101,17 @@ func (s Store) SearchMessagebusQueueSettings(ctx context.Context, f types.Messag
 // are collected due to failed check on a specific row (by check fn).
 //
 // Function then moves cursor to the last item fetched
-func (s Store) fetchFullPageOfMessagebusQueueSettings(
+func (s Store) fetchFullPageOfQueues(
 	ctx context.Context,
 	q squirrel.SelectBuilder,
 	sort filter.SortExprSet,
 	cursor *filter.PagingCursor,
 	reqItems uint,
-	check func(*types.MessagebusQueueSetting) (bool, error),
+	check func(*types.Queue) (bool, error),
 	cursorCond func(*filter.PagingCursor) squirrel.Sqlizer,
-) (set []*types.MessagebusQueueSetting, prev, next *filter.PagingCursor, err error) {
+) (set []*types.Queue, prev, next *filter.PagingCursor, err error) {
 	var (
-		aux []*types.MessagebusQueueSetting
+		aux []*types.Queue
 
 		// When cursor for a previous page is used it's marked as reversed
 		// This tells us to flip the descending flag on all used sort keys
@@ -132,7 +132,7 @@ func (s Store) fetchFullPageOfMessagebusQueueSettings(
 		hasNext bool
 	)
 
-	set = make([]*types.MessagebusQueueSetting, 0, DefaultSliceCapacity)
+	set = make([]*types.Queue, 0, DefaultSliceCapacity)
 
 	for try := 0; try < MaxRefetches; try++ {
 		if cursor != nil {
@@ -147,7 +147,7 @@ func (s Store) fetchFullPageOfMessagebusQueueSettings(
 			tryQuery = tryQuery.Limit(uint64(limit + 1))
 		}
 
-		if aux, err = s.QueryMessagebusQueueSettings(ctx, tryQuery, check); err != nil {
+		if aux, err = s.QueryQueues(ctx, tryQuery, check); err != nil {
 			return nil, nil, nil, err
 		}
 
@@ -177,7 +177,7 @@ func (s Store) fetchFullPageOfMessagebusQueueSettings(
 			}
 
 			// Update cursor so that it points to the last item fetched
-			cursor = s.collectMessagebusQueueSettingCursorValues(set[collected-1], sort...)
+			cursor = s.collectQueueCursorValues(set[collected-1], sort...)
 
 			// Copy reverse flag from sorting
 			cursor.LThen = sort.Reversed()
@@ -209,32 +209,32 @@ func (s Store) fetchFullPageOfMessagebusQueueSettings(
 	}
 
 	if hasPrev {
-		prev = s.collectMessagebusQueueSettingCursorValues(set[0], sort...)
+		prev = s.collectQueueCursorValues(set[0], sort...)
 		prev.ROrder = true
 		prev.LThen = !sort.Reversed()
 	}
 
 	if hasNext {
-		next = s.collectMessagebusQueueSettingCursorValues(set[collected-1], sort...)
+		next = s.collectQueueCursorValues(set[collected-1], sort...)
 		next.LThen = sort.Reversed()
 	}
 
 	return set, prev, next, nil
 }
 
-// QueryMessagebusQueueSettings queries the database, converts and checks each row and
+// QueryQueues queries the database, converts and checks each row and
 // returns collected set
 //
 // Fn also returns total number of fetched items and last fetched item so that the caller can construct cursor
 // for next page of results
-func (s Store) QueryMessagebusQueueSettings(
+func (s Store) QueryQueues(
 	ctx context.Context,
 	q squirrel.Sqlizer,
-	check func(*types.MessagebusQueueSetting) (bool, error),
-) ([]*types.MessagebusQueueSetting, error) {
+	check func(*types.Queue) (bool, error),
+) ([]*types.Queue, error) {
 	var (
-		set = make([]*types.MessagebusQueueSetting, 0, DefaultSliceCapacity)
-		res *types.MessagebusQueueSetting
+		set = make([]*types.Queue, 0, DefaultSliceCapacity)
+		res *types.Queue
 
 		// Query rows with
 		rows, err = s.Query(ctx, q)
@@ -247,7 +247,7 @@ func (s Store) QueryMessagebusQueueSettings(
 	defer rows.Close()
 	for rows.Next() {
 		if err = rows.Err(); err == nil {
-			res, err = s.internalMessagebusQueueSettingRowScanner(rows)
+			res, err = s.internalQueueRowScanner(rows)
 		}
 
 		if err != nil {
@@ -260,29 +260,29 @@ func (s Store) QueryMessagebusQueueSettings(
 	return set, rows.Err()
 }
 
-// LookupMessagebusQueueSettingByID searches for queue by ID
-func (s Store) LookupMessagebusQueueSettingByID(ctx context.Context, id uint64) (*types.MessagebusQueueSetting, error) {
-	return s.execLookupMessagebusQueueSetting(ctx, squirrel.Eq{
+// LookupQueueByID searches for queue by ID
+func (s Store) LookupQueueByID(ctx context.Context, id uint64) (*types.Queue, error) {
+	return s.execLookupQueue(ctx, squirrel.Eq{
 		s.preprocessColumn("mqs.id", ""): store.PreprocessValue(id, ""),
 	})
 }
 
-// LookupMessagebusQueueSettingByQueue searches for queue by queue name
-func (s Store) LookupMessagebusQueueSettingByQueue(ctx context.Context, queue string) (*types.MessagebusQueueSetting, error) {
-	return s.execLookupMessagebusQueueSetting(ctx, squirrel.Eq{
+// LookupQueueByQueue searches for queue by queue name
+func (s Store) LookupQueueByQueue(ctx context.Context, queue string) (*types.Queue, error) {
+	return s.execLookupQueue(ctx, squirrel.Eq{
 		s.preprocessColumn("mqs.queue", ""): store.PreprocessValue(queue, ""),
 	})
 }
 
-// CreateMessagebusQueueSetting creates one or more rows in queue_settings table
-func (s Store) CreateMessagebusQueueSetting(ctx context.Context, rr ...*types.MessagebusQueueSetting) (err error) {
+// CreateQueue creates one or more rows in queue_settings table
+func (s Store) CreateQueue(ctx context.Context, rr ...*types.Queue) (err error) {
 	for _, res := range rr {
-		err = s.checkMessagebusQueueSettingConstraints(ctx, res)
+		err = s.checkQueueConstraints(ctx, res)
 		if err != nil {
 			return err
 		}
 
-		err = s.execCreateMessagebusQueueSettings(ctx, s.internalMessagebusQueueSettingEncoder(res))
+		err = s.execCreateQueues(ctx, s.internalQueueEncoder(res))
 		if err != nil {
 			return err
 		}
@@ -291,25 +291,25 @@ func (s Store) CreateMessagebusQueueSetting(ctx context.Context, rr ...*types.Me
 	return
 }
 
-// UpdateMessagebusQueueSetting updates one or more existing rows in queue_settings
-func (s Store) UpdateMessagebusQueueSetting(ctx context.Context, rr ...*types.MessagebusQueueSetting) error {
-	return s.partialMessagebusQueueSettingUpdate(ctx, nil, rr...)
+// UpdateQueue updates one or more existing rows in queue_settings
+func (s Store) UpdateQueue(ctx context.Context, rr ...*types.Queue) error {
+	return s.partialQueueUpdate(ctx, nil, rr...)
 }
 
-// partialMessagebusQueueSettingUpdate updates one or more existing rows in queue_settings
-func (s Store) partialMessagebusQueueSettingUpdate(ctx context.Context, onlyColumns []string, rr ...*types.MessagebusQueueSetting) (err error) {
+// partialQueueUpdate updates one or more existing rows in queue_settings
+func (s Store) partialQueueUpdate(ctx context.Context, onlyColumns []string, rr ...*types.Queue) (err error) {
 	for _, res := range rr {
-		err = s.checkMessagebusQueueSettingConstraints(ctx, res)
+		err = s.checkQueueConstraints(ctx, res)
 		if err != nil {
 			return err
 		}
 
-		err = s.execUpdateMessagebusQueueSettings(
+		err = s.execUpdateQueues(
 			ctx,
 			squirrel.Eq{
 				s.preprocessColumn("mqs.id", ""): store.PreprocessValue(res.ID, ""),
 			},
-			s.internalMessagebusQueueSettingEncoder(res).Skip("id").Only(onlyColumns...))
+			s.internalQueueEncoder(res).Skip("id").Only(onlyColumns...))
 		if err != nil {
 			return err
 		}
@@ -318,15 +318,15 @@ func (s Store) partialMessagebusQueueSettingUpdate(ctx context.Context, onlyColu
 	return
 }
 
-// UpsertMessagebusQueueSetting updates one or more existing rows in queue_settings
-func (s Store) UpsertMessagebusQueueSetting(ctx context.Context, rr ...*types.MessagebusQueueSetting) (err error) {
+// UpsertQueue updates one or more existing rows in queue_settings
+func (s Store) UpsertQueue(ctx context.Context, rr ...*types.Queue) (err error) {
 	for _, res := range rr {
-		err = s.checkMessagebusQueueSettingConstraints(ctx, res)
+		err = s.checkQueueConstraints(ctx, res)
 		if err != nil {
 			return err
 		}
 
-		err = s.execUpsertMessagebusQueueSettings(ctx, s.internalMessagebusQueueSettingEncoder(res))
+		err = s.execUpsertQueues(ctx, s.internalQueueEncoder(res))
 		if err != nil {
 			return err
 		}
@@ -335,11 +335,11 @@ func (s Store) UpsertMessagebusQueueSetting(ctx context.Context, rr ...*types.Me
 	return nil
 }
 
-// DeleteMessagebusQueueSetting Deletes one or more rows from queue_settings table
-func (s Store) DeleteMessagebusQueueSetting(ctx context.Context, rr ...*types.MessagebusQueueSetting) (err error) {
+// DeleteQueue Deletes one or more rows from queue_settings table
+func (s Store) DeleteQueue(ctx context.Context, rr ...*types.Queue) (err error) {
 	for _, res := range rr {
 
-		err = s.execDeleteMessagebusQueueSettings(ctx, squirrel.Eq{
+		err = s.execDeleteQueues(ctx, squirrel.Eq{
 			s.preprocessColumn("mqs.id", ""): store.PreprocessValue(res.ID, ""),
 		})
 		if err != nil {
@@ -350,31 +350,31 @@ func (s Store) DeleteMessagebusQueueSetting(ctx context.Context, rr ...*types.Me
 	return nil
 }
 
-// DeleteMessagebusQueueSettingByID Deletes row from the queue_settings table
-func (s Store) DeleteMessagebusQueueSettingByID(ctx context.Context, ID uint64) error {
-	return s.execDeleteMessagebusQueueSettings(ctx, squirrel.Eq{
+// DeleteQueueByID Deletes row from the queue_settings table
+func (s Store) DeleteQueueByID(ctx context.Context, ID uint64) error {
+	return s.execDeleteQueues(ctx, squirrel.Eq{
 		s.preprocessColumn("mqs.id", ""): store.PreprocessValue(ID, ""),
 	})
 }
 
-// TruncateMessagebusQueueSettings Deletes all rows from the queue_settings table
-func (s Store) TruncateMessagebusQueueSettings(ctx context.Context) error {
-	return s.Truncate(ctx, s.messagebusQueueSettingTable())
+// TruncateQueues Deletes all rows from the queue_settings table
+func (s Store) TruncateQueues(ctx context.Context) error {
+	return s.Truncate(ctx, s.queueTable())
 }
 
-// execLookupMessagebusQueueSetting prepares MessagebusQueueSetting query and executes it,
-// returning types.MessagebusQueueSetting (or error)
-func (s Store) execLookupMessagebusQueueSetting(ctx context.Context, cnd squirrel.Sqlizer) (res *types.MessagebusQueueSetting, err error) {
+// execLookupQueue prepares Queue query and executes it,
+// returning types.Queue (or error)
+func (s Store) execLookupQueue(ctx context.Context, cnd squirrel.Sqlizer) (res *types.Queue, err error) {
 	var (
 		row rowScanner
 	)
 
-	row, err = s.QueryRow(ctx, s.messagebusQueueSettingsSelectBuilder().Where(cnd))
+	row, err = s.QueryRow(ctx, s.queuesSelectBuilder().Where(cnd))
 	if err != nil {
 		return
 	}
 
-	res, err = s.internalMessagebusQueueSettingRowScanner(row)
+	res, err = s.internalQueueRowScanner(row)
 	if err != nil {
 		return
 	}
@@ -382,21 +382,21 @@ func (s Store) execLookupMessagebusQueueSetting(ctx context.Context, cnd squirre
 	return res, nil
 }
 
-// execCreateMessagebusQueueSettings updates all matched (by cnd) rows in queue_settings with given data
-func (s Store) execCreateMessagebusQueueSettings(ctx context.Context, payload store.Payload) error {
-	return s.Exec(ctx, s.InsertBuilder(s.messagebusQueueSettingTable()).SetMap(payload))
+// execCreateQueues updates all matched (by cnd) rows in queue_settings with given data
+func (s Store) execCreateQueues(ctx context.Context, payload store.Payload) error {
+	return s.Exec(ctx, s.InsertBuilder(s.queueTable()).SetMap(payload))
 }
 
-// execUpdateMessagebusQueueSettings updates all matched (by cnd) rows in queue_settings with given data
-func (s Store) execUpdateMessagebusQueueSettings(ctx context.Context, cnd squirrel.Sqlizer, set store.Payload) error {
-	return s.Exec(ctx, s.UpdateBuilder(s.messagebusQueueSettingTable("mqs")).Where(cnd).SetMap(set))
+// execUpdateQueues updates all matched (by cnd) rows in queue_settings with given data
+func (s Store) execUpdateQueues(ctx context.Context, cnd squirrel.Sqlizer, set store.Payload) error {
+	return s.Exec(ctx, s.UpdateBuilder(s.queueTable("mqs")).Where(cnd).SetMap(set))
 }
 
-// execUpsertMessagebusQueueSettings inserts new or updates matching (by-primary-key) rows in queue_settings with given data
-func (s Store) execUpsertMessagebusQueueSettings(ctx context.Context, set store.Payload) error {
+// execUpsertQueues inserts new or updates matching (by-primary-key) rows in queue_settings with given data
+func (s Store) execUpsertQueues(ctx context.Context, set store.Payload) error {
 	upsert, err := s.config.UpsertBuilder(
 		s.config,
-		s.messagebusQueueSettingTable(),
+		s.queueTable(),
 		set,
 		s.preprocessColumn("id", ""),
 	)
@@ -408,16 +408,16 @@ func (s Store) execUpsertMessagebusQueueSettings(ctx context.Context, set store.
 	return s.Exec(ctx, upsert)
 }
 
-// execDeleteMessagebusQueueSettings Deletes all matched (by cnd) rows in queue_settings with given data
-func (s Store) execDeleteMessagebusQueueSettings(ctx context.Context, cnd squirrel.Sqlizer) error {
-	return s.Exec(ctx, s.DeleteBuilder(s.messagebusQueueSettingTable("mqs")).Where(cnd))
+// execDeleteQueues Deletes all matched (by cnd) rows in queue_settings with given data
+func (s Store) execDeleteQueues(ctx context.Context, cnd squirrel.Sqlizer) error {
+	return s.Exec(ctx, s.DeleteBuilder(s.queueTable("mqs")).Where(cnd))
 }
 
-func (s Store) internalMessagebusQueueSettingRowScanner(row rowScanner) (res *types.MessagebusQueueSetting, err error) {
-	res = &types.MessagebusQueueSetting{}
+func (s Store) internalQueueRowScanner(row rowScanner) (res *types.Queue, err error) {
+	res = &types.Queue{}
 
-	if _, has := s.config.RowScanners["messagebusQueueSetting"]; has {
-		scanner := s.config.RowScanners["messagebusQueueSetting"].(func(_ rowScanner, _ *types.MessagebusQueueSetting) error)
+	if _, has := s.config.RowScanners["queue"]; has {
+		scanner := s.config.RowScanners["queue"].(func(_ rowScanner, _ *types.Queue) error)
 		err = scanner(row, res)
 	} else {
 		err = row.Scan(
@@ -439,19 +439,19 @@ func (s Store) internalMessagebusQueueSettingRowScanner(row rowScanner) (res *ty
 	}
 
 	if err != nil {
-		return nil, errors.Store("could not scan messagebusQueueSetting db row: %s", err).Wrap(err)
+		return nil, errors.Store("could not scan queue db row: %s", err).Wrap(err)
 	} else {
 		return res, nil
 	}
 }
 
-// QueryMessagebusQueueSettings returns squirrel.SelectBuilder with set table and all columns
-func (s Store) messagebusQueueSettingsSelectBuilder() squirrel.SelectBuilder {
-	return s.SelectBuilder(s.messagebusQueueSettingTable("mqs"), s.messagebusQueueSettingColumns("mqs")...)
+// QueryQueues returns squirrel.SelectBuilder with set table and all columns
+func (s Store) queuesSelectBuilder() squirrel.SelectBuilder {
+	return s.SelectBuilder(s.queueTable("mqs"), s.queueColumns("mqs")...)
 }
 
-// messagebusQueueSettingTable name of the db table
-func (Store) messagebusQueueSettingTable(aa ...string) string {
+// queueTable name of the db table
+func (Store) queueTable(aa ...string) string {
 	var alias string
 	if len(aa) > 0 {
 		alias = " AS " + aa[0]
@@ -460,10 +460,10 @@ func (Store) messagebusQueueSettingTable(aa ...string) string {
 	return "queue_settings" + alias
 }
 
-// MessagebusQueueSettingColumns returns all defined table columns
+// QueueColumns returns all defined table columns
 //
 // With optional string arg, all columns are returned aliased
-func (Store) messagebusQueueSettingColumns(aa ...string) []string {
+func (Store) queueColumns(aa ...string) []string {
 	var alias string
 	if len(aa) > 0 {
 		alias = aa[0] + "."
@@ -485,11 +485,11 @@ func (Store) messagebusQueueSettingColumns(aa ...string) []string {
 
 // {true true false true false false}
 
-// internalMessagebusQueueSettingEncoder encodes fields from types.MessagebusQueueSetting to store.Payload (map)
+// internalQueueEncoder encodes fields from types.Queue to store.Payload (map)
 //
-// Encoding is done by using generic approach or by calling encodeMessagebusQueueSetting
+// Encoding is done by using generic approach or by calling encodeQueue
 // func when rdbms.customEncoder=true
-func (s Store) internalMessagebusQueueSettingEncoder(res *types.MessagebusQueueSetting) store.Payload {
+func (s Store) internalQueueEncoder(res *types.Queue) store.Payload {
 	return store.Payload{
 		"id":         res.ID,
 		"consumer":   res.Consumer,
@@ -504,7 +504,7 @@ func (s Store) internalMessagebusQueueSettingEncoder(res *types.MessagebusQueueS
 	}
 }
 
-// collectMessagebusQueueSettingCursorValues collects values from the given resource that and sets them to the cursor
+// collectQueueCursorValues collects values from the given resource that and sets them to the cursor
 // to be used for pagination
 //
 // Values that are collected must come from sortable, unique or primary columns/fields
@@ -513,7 +513,7 @@ func (s Store) internalMessagebusQueueSettingEncoder(res *types.MessagebusQueueS
 // Known issue:
 //   when collecting cursor values for query that sorts by unique column with partial index (ie: unique handle on
 //   undeleted items)
-func (s Store) collectMessagebusQueueSettingCursorValues(res *types.MessagebusQueueSetting, cc ...*filter.SortExpr) *filter.PagingCursor {
+func (s Store) collectQueueCursorValues(res *types.Queue, cc ...*filter.SortExpr) *filter.PagingCursor {
 	var (
 		cursor = &filter.PagingCursor{LThen: filter.SortExprSet(cc).Reversed()}
 
@@ -555,12 +555,12 @@ func (s Store) collectMessagebusQueueSettingCursorValues(res *types.MessagebusQu
 	return cursor
 }
 
-// checkMessagebusQueueSettingConstraints performs lookups (on valid) resource to check if any of the values on unique fields
+// checkQueueConstraints performs lookups (on valid) resource to check if any of the values on unique fields
 // already exists in the store
 //
 // Using built-in constraint checking would be more performant but unfortunately we cannot rely
 // on the full support (MySQL does not support conditional indexes)
-func (s *Store) checkMessagebusQueueSettingConstraints(ctx context.Context, res *types.MessagebusQueueSetting) error {
+func (s *Store) checkQueueConstraints(ctx context.Context, res *types.Queue) error {
 	// Consider resource valid when all fields in unique constraint check lookups
 	// have valid (non-empty) value
 	//

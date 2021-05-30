@@ -29,7 +29,7 @@ package tests
 //  - store/flags.yaml
 //  - store/labels.yaml
 //  - store/messagebus_queue_message.yaml
-//  - store/messagebus_queue_settings.yaml
+//  - store/queues.yaml
 //  - store/rbac_rules.yaml
 //  - store/reminders.yaml
 //  - store/role_members.yaml
@@ -184,9 +184,9 @@ func testAllGenerated(t *testing.T, s store.Storer) {
 		testMessagebusQueueMessage(t, s)
 	})
 
-	// Run generated tests for MessagebusQueueSettings
-	t.Run("MessagebusQueueSettings", func(t *testing.T) {
-		testMessagebusQueueSettings(t, s)
+	// Run generated tests for Queues
+	t.Run("Queues", func(t *testing.T) {
+		testQueues(t, s)
 	})
 
 	// Run generated tests for RbacRules

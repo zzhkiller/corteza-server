@@ -6,7 +6,7 @@ import (
 	"github.com/cortezaproject/corteza-server/pkg/messagebus"
 )
 
-func (s Store) convertMessagebusQueueSettingFilter(f messagebus.QueueSettingsFilter) (query squirrel.SelectBuilder, err error) {
+func (s Store) convertMessagebusQueueSettingFilter(f messagebus.MessageQueueFilter) (query squirrel.SelectBuilder, err error) {
 	query = s.messagebusQueueSettingsSelectBuilder()
 	query = filter.StateCondition(query, "mqs.deleted_at", f.Deleted)
 
