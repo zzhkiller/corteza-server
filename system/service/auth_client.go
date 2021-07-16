@@ -225,7 +225,7 @@ func (svc *authClient) Create(ctx context.Context, new *types.AuthClient) (ac *t
 		}
 
 		if !validateScopes(new.Scope) {
-			return AuthClientErrUnknownGrantType()
+			return AuthClientErrUnknownScope()
 		}
 
 		if new.Security == nil {
@@ -323,7 +323,7 @@ func (svc *authClient) Update(ctx context.Context, upd *types.AuthClient) (app *
 		}
 
 		if app.Scope != upd.Scope && !validateScopes(upd.Scope) {
-			return AuthClientErrUnknownGrantType()
+			return AuthClientErrUnknownScope()
 		}
 
 		// Assign changed values after afterUpdate events are emitted
