@@ -9,6 +9,7 @@ package service
 // Definitions file that controls how this file is generated:
 // - system.application.yaml
 // - system.auth-client.yaml
+// - system.queue.yaml
 // - system.role.yaml
 // - system.template.yaml
 // - system.user.yaml
@@ -95,6 +96,31 @@ func (svc accessControl) List() (out []map[string]string) {
 			"type": types.AuthClientResourceType,
 			"any":  types.AuthClientRbacResource(0),
 			"op":   "authorize",
+		},
+		{
+			"type": types.QueueResourceType,
+			"any":  types.QueueRbacResource(0),
+			"op":   "read",
+		},
+		{
+			"type": types.QueueResourceType,
+			"any":  types.QueueRbacResource(0),
+			"op":   "update",
+		},
+		{
+			"type": types.QueueResourceType,
+			"any":  types.QueueRbacResource(0),
+			"op":   "delete",
+		},
+		{
+			"type": types.QueueResourceType,
+			"any":  types.QueueRbacResource(0),
+			"op":   "queue.read",
+		},
+		{
+			"type": types.QueueResourceType,
+			"any":  types.QueueRbacResource(0),
+			"op":   "queue.write",
 		},
 		{
 			"type": types.RoleResourceType,
@@ -382,6 +408,41 @@ func (svc accessControl) CanAuthorizeAuthClient(ctx context.Context, r *types.Au
 	return svc.can(ctx, "authorize", r)
 }
 
+// CanReadQueue checks if current user can read queue
+//
+// This function is auto-generated
+func (svc accessControl) CanReadQueue(ctx context.Context, r *types.Queue) bool {
+	return svc.can(ctx, "read", r)
+}
+
+// CanUpdateQueue checks if current user can update queue
+//
+// This function is auto-generated
+func (svc accessControl) CanUpdateQueue(ctx context.Context, r *types.Queue) bool {
+	return svc.can(ctx, "update", r)
+}
+
+// CanDeleteQueue checks if current user can delete queue
+//
+// This function is auto-generated
+func (svc accessControl) CanDeleteQueue(ctx context.Context, r *types.Queue) bool {
+	return svc.can(ctx, "delete", r)
+}
+
+// CanReadQueueOnQueue checks if current user can read from queue
+//
+// This function is auto-generated
+func (svc accessControl) CanReadQueueOnQueue(ctx context.Context, r *types.Queue) bool {
+	return svc.can(ctx, "queue.read", r)
+}
+
+// CanWriteQueueOnQueue checks if current user can write to queue
+//
+// This function is auto-generated
+func (svc accessControl) CanWriteQueueOnQueue(ctx context.Context, r *types.Queue) bool {
+	return svc.can(ctx, "queue.write", r)
+}
+
 // CanReadRole checks if current user can read role
 //
 // This function is auto-generated
@@ -636,6 +697,8 @@ func rbacResourceValidator(r string, oo ...string) error {
 		return rbacApplicationResourceValidator(r, oo...)
 	case types.AuthClientResourceType:
 		return rbacAuthClientResourceValidator(r, oo...)
+	case types.QueueResourceType:
+		return rbacQueueResourceValidator(r, oo...)
 	case types.RoleResourceType:
 		return rbacRoleResourceValidator(r, oo...)
 	case types.TemplateResourceType:
@@ -666,6 +729,14 @@ func rbacResourceOperations(r string) map[string]bool {
 			"update":    true,
 			"delete":    true,
 			"authorize": true,
+		}
+	case types.QueueResourceType:
+		return map[string]bool{
+			"read":        true,
+			"update":      true,
+			"delete":      true,
+			"queue.read":  true,
+			"queue.write": true,
 		}
 	case types.RoleResourceType:
 		return map[string]bool{
@@ -797,6 +868,50 @@ func rbacAuthClientResourceValidator(r string, oo ...string) error {
 		if pp[i] != "*" {
 			if i > 0 && pp[i-1] == "*" {
 				return fmt.Errorf("invalid resource path wildcard level (%d) for AuthClient", i)
+			}
+
+			if _, err := cast.ToUint64E(pp[i]); err != nil {
+				return fmt.Errorf("invalid reference for %s: '%s'", prc[i], pp[i])
+			}
+		}
+	}
+	return nil
+}
+
+// rbacQueueResourceValidator checks validity of rbac resource and operations
+//
+// Can be called without operations to check for validity of resource string only
+//
+// This function is auto-generated
+func rbacQueueResourceValidator(r string, oo ...string) error {
+	defOps := rbacResourceOperations(r)
+	for _, o := range oo {
+		if !defOps[o] {
+			return fmt.Errorf("invalid operation '%s' for system Queue resource", o)
+		}
+	}
+
+	if !strings.HasPrefix(r, types.QueueResourceType) {
+		// expecting resource to always include path
+		return fmt.Errorf("invalid resource type")
+	}
+
+	const sep = "/"
+	var (
+		pp  = strings.Split(strings.Trim(r[len(types.QueueResourceType):], sep), sep)
+		prc = []string{
+			"ID",
+		}
+	)
+
+	if len(pp) != len(prc) {
+		return fmt.Errorf("invalid resource path structure")
+	}
+
+	for i := 0; i < len(pp); i++ {
+		if pp[i] != "*" {
+			if i > 0 && pp[i-1] == "*" {
+				return fmt.Errorf("invalid resource path wildcard level (%d) for Queue", i)
 			}
 
 			if _, err := cast.ToUint64E(pp[i]); err != nil {

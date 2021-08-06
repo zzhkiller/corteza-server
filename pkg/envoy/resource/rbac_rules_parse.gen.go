@@ -18,6 +18,7 @@ package resource
 // - compose.yaml
 // - system.application.yaml
 // - system.auth-client.yaml
+// - system.queue.yaml
 // - system.role.yaml
 // - system.template.yaml
 // - system.user.yaml
@@ -187,6 +188,16 @@ func ParseRule(res string) (string, *Ref, []*Ref, error) {
 			path[0],
 		)
 		return systemTypes.AuthClientResourceType, ref, pp, err
+
+	case systemTypes.QueueResourceType:
+		if len(path) != 1 {
+			return "", nil, nil, fmt.Errorf("expecting 1 reference components in path, got %d", len(path))
+		}
+		ref, pp, err := SystemQueueRbacReferences(
+			// queue
+			path[0],
+		)
+		return systemTypes.QueueResourceType, ref, pp, err
 
 	case systemTypes.RoleResourceType:
 		if len(path) != 1 {

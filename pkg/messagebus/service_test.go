@@ -7,7 +7,10 @@ import (
 	"time"
 
 	"github.com/cortezaproject/corteza-server/pkg/eventbus"
+	"github.com/cortezaproject/corteza-server/pkg/messagebus/store"
+	mt "github.com/cortezaproject/corteza-server/pkg/messagebus/types"
 	"github.com/cortezaproject/corteza-server/pkg/options"
+	"github.com/cortezaproject/corteza-server/system/types"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
@@ -31,18 +34,18 @@ type (
 		messages     [][]byte
 		notification func(ctx context.Context) <-chan interface{}
 		ticker       func(ctx context.Context) <-chan time.Time
-		read         func(ctx context.Context) (QueueMessageSet, error)
+		read         func(ctx context.Context) (types.QueueMessageSet, error)
 		write        func(ctx context.Context, p []byte) error
-		setStore     func(qs QueueStorer)
-		process      func(ctx context.Context, qm QueueMessage) error
+		setStore     func(qs store.QueueStorer)
+		process      func(ctx context.Context, qm types.QueueMessage) error
 	}
 )
 
 var (
 	mOptions            = &options.MessagebusOpt{Enabled: true, LogEnabled: true}
-	sqlQueueSettings    = QueueSettings{ID: 1, Consumer: "sql", Queue: "sql"}
-	foobarQueueSettings = QueueSettings{ID: 1, Consumer: "foobar", Queue: "foobar"}
-	foobarQueueMessage  = QueueMessage{ID: 1, Queue: "foobar", Payload: []byte(`{}`), Created: now()}
+	sqlQueueSettings    = types.Queue{ID: 1, Consumer: "sql", Queue: "sql"}
+	foobarQueueSettings = types.Queue{ID: 1, Consumer: "foobar", Queue: "foobar"}
+	foobarQueueMessage  = types.QueueMessage{ID: 1, Queue: "foobar", Payload: []byte(`{}`), Created: now()}
 	logger              = zap.NewNop()
 )
 
@@ -51,7 +54,7 @@ func Test_messageBusRegister(t *testing.T) {
 	ctx := context.Background()
 
 	mb := New(mOptions, logger)
-	mb.Register(ctx, &QueueSettings{Consumer: "foobar", Queue: "foobar"}, &mockQueueHandler{})
+	mb.Register(ctx, &mt.Queue{Name: "foobar", Consumer: &mockQueueHandler{}})
 
 	req.NotEmpty(mb.queues)
 	req.NotEmpty(mb.queues["foobar"])
@@ -71,9 +74,8 @@ func Test_consume(t *testing.T) {
 		[]byte("second mock payload"),
 	}
 
-	mb.queues[foobarQueueSettings.Queue] = &Queue{
-		settings: foobarQueueSettings,
-		consumer: &mockQueueHandler{
+	mb.queues[foobarQueueSettings.Queue] = &mt.Queue{
+		Consumer: &mockQueueHandler{
 			write: func(ctx context.Context, p []byte) error {
 				mockDb = append(mockDb, p)
 				w.Done()
@@ -98,16 +100,16 @@ func (mh *mockQueueHandler) Notification(ctx context.Context) <-chan interface{}
 func (mh *mockQueueHandler) Ticker(ctx context.Context) <-chan time.Time {
 	return mh.ticker(ctx)
 }
-func (mh *mockQueueHandler) Read(ctx context.Context) (QueueMessageSet, error) {
+func (mh *mockQueueHandler) Read(ctx context.Context) (types.QueueMessageSet, error) {
 	return mh.read(ctx)
 }
 func (mh *mockQueueHandler) Write(ctx context.Context, p []byte) error {
 	return mh.write(ctx, p)
 }
-func (mh *mockQueueHandler) SetStore(qs QueueStorer) {
+func (mh *mockQueueHandler) SetStore(qs store.QueueStorer) {
 	mh.setStore(qs)
 }
-func (mh *mockQueueHandler) Process(ctx context.Context, qm QueueMessage) error {
+func (mh *mockQueueHandler) Process(ctx context.Context, qm types.QueueMessage) error {
 	return mh.process(ctx, qm)
 }
 
@@ -126,4 +128,9 @@ func tickOnce(tt time.Ticker) {
 		for ; true; <-tt.C {
 		}
 	}()
+}
+
+func now() *time.Time {
+	t := time.Now()
+	return &t
 }

@@ -1,8 +1,11 @@
-package messagebus
+package types
 
 import (
 	"context"
 	"time"
+
+	"github.com/cortezaproject/corteza-server/pkg/messagebus/store"
+	"github.com/cortezaproject/corteza-server/system/types"
 )
 
 type (
@@ -10,7 +13,7 @@ type (
 		Reader
 		Subscriber
 		Poller
-		Storer
+		store.Storer
 	}
 
 	Subscriber interface {
@@ -22,6 +25,6 @@ type (
 	}
 
 	Reader interface {
-		Read(ctx context.Context) (QueueMessageSet, error)
+		Read(ctx context.Context) (types.QueueMessageSet, error)
 	}
 )

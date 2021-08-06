@@ -8,7 +8,6 @@ import (
 	composeTypes "github.com/cortezaproject/corteza-server/compose/types"
 	federationTypes "github.com/cortezaproject/corteza-server/federation/types"
 	"github.com/cortezaproject/corteza-server/pkg/envoy/resource"
-	"github.com/cortezaproject/corteza-server/pkg/messagebus"
 	"github.com/cortezaproject/corteza-server/pkg/rbac"
 	"github.com/cortezaproject/corteza-server/store"
 	systemTypes "github.com/cortezaproject/corteza-server/system/types"
@@ -254,9 +253,9 @@ func (n *rbacRule) Encode(ctx context.Context, pl *payload) (err error) {
 	case systemTypes.TemplateResourceType:
 		// @todo add support for importing rbac rules for specific template
 		res.Resource = systemTypes.TemplateRbacResource(p1ID)
-	case messagebus.QueueResourceType:
+	case systemTypes.QueueResourceType:
 		// @todo add support for importing rbac rules for specific queue
-		res.Resource = messagebus.QueueRbacResource(p1ID)
+		res.Resource = systemTypes.QueueRbacResource(p1ID)
 
 	case federationTypes.NodeResourceType:
 		// @todo add support for importing rbac rules for specific queue

@@ -112,17 +112,17 @@ func (h helper) noError(err error) {
 	h.a.NoError(err)
 }
 
-func (h helper) prepareQueues(ctx context.Context, qs ...*messagebus.QueueSettings) {
-	h.noError(testApp.Store.TruncateMessagebusQueueSettings(ctx))
-	h.noError(testApp.Store.CreateMessagebusQueueSetting(ctx, qs...))
+func (h helper) prepareQueues(ctx context.Context, qs ...*sysTypes.Queue) {
+	h.noError(testApp.Store.TruncateQueues(ctx))
+	h.noError(testApp.Store.CreateQueue(ctx, qs...))
 }
 
-func (h helper) prepareMessages(ctx context.Context, qs ...*messagebus.QueueSettings) {
-	h.noError(testApp.Store.TruncateMessagebusQueueMessages(ctx))
+func (h helper) prepareMessages(ctx context.Context, qs ...*sysTypes.Queue) {
+	h.noError(testApp.Store.TruncateQueueMessages(ctx))
 }
 
-func (h helper) checkPersistedMessages(ctx context.Context, f messagebus.QueueMessageFilter) messagebus.QueueMessageSet {
-	s, f, err := service.DefaultStore.SearchMessagebusQueueMessages(ctx, f)
+func (h helper) checkPersistedMessages(ctx context.Context, f sysTypes.QueueMessageFilter) sysTypes.QueueMessageSet {
+	s, f, err := service.DefaultStore.SearchQueueMessages(ctx, f)
 	h.noError(err)
 
 	return s

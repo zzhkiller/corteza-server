@@ -1,4 +1,4 @@
-package messagebus
+package types
 
 import (
 	"context"
@@ -17,15 +17,11 @@ type (
 
 	Consumer interface {
 		Writer
-		Storer
+		// Storer
 	}
 
 	Writer interface {
 		Write(ctx context.Context, p []byte) error
-	}
-
-	Storer interface {
-		SetStore(QueueStorer)
 	}
 )
 
