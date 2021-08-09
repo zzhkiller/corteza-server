@@ -7,7 +7,7 @@ allow:
       - template.search
       - role.search
 
-    system:user:
+    corteza::system:user/*:
       - read
       - email.unmask
       - name.unmask
