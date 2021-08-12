@@ -11,6 +11,7 @@ package options
 type (
 	DiscoveryOpt struct {
 		Enabled bool `env:"DISCOVERY_ENABLED"`
+		Debug   bool `env:"DISCOVERY_DEBUG"`
 	}
 )
 
@@ -18,6 +19,7 @@ type (
 func Discovery() (o *DiscoveryOpt) {
 	o = &DiscoveryOpt{
 		Enabled: false,
+		Debug:   false,
 	}
 
 	fill(o)

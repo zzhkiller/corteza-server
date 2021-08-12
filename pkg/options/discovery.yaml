@@ -3,3 +3,9 @@ props:
     type: bool
     default: false
     description: Enable discovery endpoints
+
+  - name: debug
+    type: bool
+    default: false
+    docs:
+      description: Enable debug activity logging.

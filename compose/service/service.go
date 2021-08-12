@@ -7,6 +7,7 @@ import (
 	"github.com/cortezaproject/corteza-server/compose/automation"
 	"github.com/cortezaproject/corteza-server/compose/types"
 	"github.com/cortezaproject/corteza-server/pkg/actionlog"
+	"github.com/cortezaproject/corteza-server/pkg/activitylog"
 	"github.com/cortezaproject/corteza-server/pkg/corredor"
 	"github.com/cortezaproject/corteza-server/pkg/eventbus"
 	"github.com/cortezaproject/corteza-server/pkg/filter"
@@ -26,6 +27,7 @@ import (
 type (
 	Config struct {
 		ActionLog options.ActionLogOpt
+		Discovery options.DiscoveryOpt
 		Storage   options.ObjectStoreOpt
 	}
 
@@ -71,7 +73,7 @@ var (
 	}
 )
 
-// Initializes compose-only services
+// Initialize compose-only services
 func Initialize(ctx context.Context, log *zap.Logger, s store.Storer, c Config) (err error) {
 	var (
 		hcd = healthcheck.Defaults()
@@ -93,6 +95,24 @@ func Initialize(ctx context.Context, log *zap.Logger, s store.Storer, c Config) 
 		}
 
 		DefaultActionlog = actionlog.NewService(DefaultStore, log, tee, policy)
+	}
+
+	// Activity log for record
+	{
+		log := zap.NewNop()
+		if c.Discovery.Debug {
+			log = logger.MakeDebugLogger()
+		}
+
+		DefaultActivityLog := activitylog.Service(log, c.Discovery, DefaultStore, eventbus.Service())
+		err = DefaultActivityLog.InitActivityLog(ctx, []string{
+			(types.Namespace{}).LabelResourceKind(),
+			(types.Module{}).LabelResourceKind(),
+			(types.Record{}).LabelResourceKind(),
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	DefaultAccessControl = AccessControl()
