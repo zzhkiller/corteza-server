@@ -28,6 +28,16 @@ func (t *testResource) Refs() resource.RefSet {
 	return t.refs
 }
 
+func (t *testResource) ReID(ii resource.Identifiers) {
+	// no need for implementation
+	panic("not implemented")
+}
+
+func (t *testResource) ReRef(old resource.RefSet, new resource.RefSet) {
+	// no need for implementation
+	panic("not implemented")
+}
+
 func TestGraphBuilder_Rel(t *testing.T) {
 	req := require.New(t)
 	ctx := context.Background()
