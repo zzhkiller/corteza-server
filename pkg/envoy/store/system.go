@@ -25,7 +25,6 @@ type (
 		rbac.RuleFilter
 		// This will help us determine what rules for what resources we are able to export
 		resourceID map[uint64]bool
-		strict     bool
 	}
 	resourceTranslationFilter types.ResourceTranslationFilter
 
