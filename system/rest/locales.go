@@ -46,7 +46,7 @@ func (Locale) New() *Locale {
 func (ctrl Locale) List(ctx context.Context, r *request.LocaleList) (interface{}, error) {
 	var (
 		rval        = make([]*localeResponse, 0, 16)
-		currentLang = locale.GetLanguageFromContext(ctx)
+		currentLang = locale.GetAcceptLanguageFromContext(ctx)
 	)
 
 	for _, l := range locale.Global().List() {
