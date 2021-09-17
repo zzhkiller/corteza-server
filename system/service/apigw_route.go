@@ -30,11 +30,11 @@ type (
 )
 
 func Route() *apigwRoute {
-	return (&apigwRoute{
+	return &apigwRoute{
 		ac:        DefaultAccessControl,
 		actionlog: DefaultActionlog,
 		store:     DefaultStore,
-	})
+	}
 }
 
 func (svc *apigwRoute) FindByID(ctx context.Context, ID uint64) (q *types.ApigwRoute, err error) {

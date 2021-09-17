@@ -30,12 +30,12 @@ type (
 )
 
 func Filter() *apigwFilter {
-	return (&apigwFilter{
+	return &apigwFilter{
 		route:     DefaultApigwRoute,
 		ac:        DefaultAccessControl,
 		actionlog: DefaultActionlog,
 		store:     DefaultStore,
-	})
+	}
 }
 
 func (svc *apigwFilter) FindByID(ctx context.Context, ID uint64) (q *types.ApigwFilter, err error) {
