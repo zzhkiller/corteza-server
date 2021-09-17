@@ -11,6 +11,7 @@ import (
 	composeTypes "github.com/cortezaproject/corteza-server/compose/types"
 	"github.com/cortezaproject/corteza-server/pkg/envoy"
 	"github.com/cortezaproject/corteza-server/pkg/envoy/resource"
+	systemTypes "github.com/cortezaproject/corteza-server/system/types"
 	"golang.org/x/text/language"
 )
 
@@ -61,6 +62,10 @@ func (r *resourceTranslation) Encode(ctx context.Context, doc *Document, state *
 	// In cases where a specific rule is created for a specific resource, nest the rule
 	// under the related namespace.
 	// For now all rules will be nested under a root node for simplicity sake.
+
+	if r == nil {
+		return
+	}
 
 	refResource, err := r.makeResourceTranslationResource(state)
 	if err != nil {
@@ -187,6 +192,17 @@ func (r *resourceTranslation) makeResourceTranslationResource(state *envoy.Resou
 		}
 
 		return fmt.Sprintf(automationTypes.WorkflowResourceTranslationTpl(), automationTypes.WorkflowResourceTranslationType, p0ID), nil
+
+	case systemTypes.ReportResourceType:
+		if res.RefRes != nil {
+			p0 := resource.FindReport(state.ParentResources, res.RefRes.Identifiers)
+			if p0 == nil {
+				return "", resource.ReportErrUnresolved(res.RefRes.Identifiers)
+			}
+			p0ID = p0.Handle
+		}
+
+		return fmt.Sprintf(systemTypes.ReportResourceTranslationTpl(), systemTypes.ReportResourceTranslationType, p0ID), nil
 
 	default:
 		return "", fmt.Errorf("unsupported resource type '%s' for locale resource YAML encode", r.refLocaleRes.ResourceType)
