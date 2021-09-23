@@ -325,8 +325,6 @@ func (n *rbacRule) makeRBACResource(pl *payload) (string, error) {
 
 	case systemTypes.ApigwRouteResourceType:
 		return systemTypes.ApigwRouteRbacResource(p1ID), nil
-	case systemTypes.ApigwFilterResourceType:
-		return systemTypes.ApigwFilterRbacResource(p1ID), nil
 	case systemTypes.AuthClientResourceType:
 		// @todo add support for importing rbac rules for specific client
 		return systemTypes.AuthClientRbacResource(p1ID), nil

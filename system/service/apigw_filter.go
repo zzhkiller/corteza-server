@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/cortezaproject/corteza-server/pkg/actionlog"
 	"github.com/cortezaproject/corteza-server/pkg/apigw"
 	agtypes "github.com/cortezaproject/corteza-server/pkg/apigw/types"
@@ -15,11 +14,11 @@ type (
 	apigwFilter struct {
 		actionlog actionlog.Recorder
 		store     store.Storer
-		ac        functionAccessController
+		ac        filterAccessController
 		route     *apigwRoute
 	}
 
-	functionAccessController interface {
+	filterAccessController interface {
 		CanSearchApigwFilters(context.Context) bool
 
 		CanCreateApigwFilter(context.Context) bool
