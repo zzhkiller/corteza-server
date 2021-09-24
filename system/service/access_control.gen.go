@@ -1,10 +1,5 @@
 package service
 
-import (
-	"github.com/cortezaproject/corteza-server/pkg/actionlog"
-	"github.com/cortezaproject/corteza-server/pkg/rbac"
-)
-
 // This file is auto-generated.
 //
 // Changes to this file may cause incorrect behavior and will be lost if
@@ -24,10 +19,11 @@ import (
 import (
 	"context"
 	"fmt"
-	"strings"
-
+	"github.com/cortezaproject/corteza-server/pkg/actionlog"
+	"github.com/cortezaproject/corteza-server/pkg/rbac"
 	"github.com/cortezaproject/corteza-server/system/types"
 	"github.com/spf13/cast"
+	"strings"
 )
 
 type (
@@ -399,27 +395,6 @@ func (svc accessControl) FindRulesByRoleID(ctx context.Context, roleID uint64) (
 	return svc.rbac.FindRulesByRoleID(roleID), nil
 }
 
-// CanReadApigwFilter checks if current user can read api gateway filter
-//
-// This function is auto-generated
-func (svc accessControl) CanReadApigwFilter(ctx context.Context, r *types.ApigwFilter) bool {
-	return svc.can(ctx, "apigw-route.read", &types.Component{})
-}
-
-// CanUpdateApigwFilter checks if current user can update api gateway filter
-//
-// This function is auto-generated
-func (svc accessControl) CanUpdateApigwFilter(ctx context.Context, r *types.ApigwFilter) bool {
-	return svc.can(ctx, "apigw-route.update", &types.Component{})
-}
-
-// CanDeleteApigwFilter checks if current user can delete api gateway filter
-//
-// This function is auto-generated
-func (svc accessControl) CanDeleteApigwFilter(ctx context.Context, r *types.ApigwFilter) bool {
-	return svc.can(ctx, "apigw-route.delete", &types.Component{})
-}
-
 // CanReadApigwRoute checks if current user can read api gateway route
 //
 // This function is auto-generated
@@ -789,20 +764,6 @@ func (svc accessControl) CanCreateApigwRoute(ctx context.Context) bool {
 // This function is auto-generated
 func (svc accessControl) CanSearchApigwRoutes(ctx context.Context) bool {
 	return svc.can(ctx, "apigw-routes.search", &types.Component{})
-}
-
-// CanCreateApigwFilter checks if current user can add api gateway filter to route
-//
-// This function is auto-generated
-func (svc accessControl) CanCreateApigwFilter(ctx context.Context) bool {
-	return svc.can(ctx, "apigw-route.create", &types.Component{})
-}
-
-// CanSearchApigwFilters checks if current user can list, search or filter api gateway filters
-//
-// This function is auto-generated
-func (svc accessControl) CanSearchApigwFilters(ctx context.Context) bool {
-	return svc.can(ctx, "apigw-route.search", &types.Component{})
 }
 
 // CanManageResourceTranslations checks if current user can list, search, create, or update resource translations
